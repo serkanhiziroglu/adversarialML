@@ -29,7 +29,6 @@ export default function Home() {
   const handleMethodChange = (e) => {
     setMethod(e.target.value);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -131,10 +130,8 @@ export default function Home() {
           </div>
         </form>
         {loading && (
-          <div className="flex justify-center">
-            <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full text-blue-500" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
+          <div className="flex flex-col items-center justify-center">
+            <div className="spinner" role="status"></div>
           </div>
         )}
         {result && (
@@ -153,6 +150,7 @@ export default function Home() {
           <div className="mt-6">
             <h2 className="text-center text-xl font-bold text-gray-900">Adversarial Image:</h2>
             <img src={adversarialImage} alt="Adversarial" className="mt-2" />
+            <div className="pb-10"></div>  {/* Add some padding at the bottom */}
           </div>
         )}
       </div>
