@@ -69,6 +69,8 @@ def upload_file():
     script_path = None
     if model == "EfficientNetB0" and method == "PGD":
         script_path = os.path.join('api', 'pgdVSenet.py')
+    elif model == "InceptionV3" and method == "PGD":  # Add this line
+        script_path = os.path.join('api', 'pgdVSinception.py')  # Add this line
 
     if script_path is None:
         return jsonify({'error': 'Invalid model or method selected'}), 400

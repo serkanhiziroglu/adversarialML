@@ -13,17 +13,17 @@ mpl.rcParams['savefig.bbox'] = 'tight'  # Remove whitespace
 
 
 def main(image_path, output_path):
-    print("Loading EfficientNetB0 model...")
-    pretrained_model = tf.keras.applications.EfficientNetB0(
+    print("Loading InceptionV3 model...")
+    pretrained_model = tf.keras.applications.InceptionV3(
         include_top=True, weights='imagenet')
     pretrained_model.trainable = False
     print("Model loaded successfully.")
 
-    decode_predictions = tf.keras.applications.efficientnet.decode_predictions
+    decode_predictions = tf.keras.applications.inception_v3.decode_predictions
 
     def preprocess(image):
-        image = tf.image.resize(image, (224, 224))
-        image = tf.cast(image, tf.float32)
+        image = tf.image.resize(image, (299, 299))
+        image = tf.keras.applications.inception_v3.preprocess_input(image)
         image = image[None, ...]
         return image
 
@@ -38,15 +38,15 @@ def main(image_path, output_path):
 
     print("Predicting label for the original image...")
     image_probs = pretrained_model.predict(image)
-    _, label, confidence = get_imagenet_label(pretrained_model.predict(image))
+    _, label, confidence = get_imagenet_label(image_probs)
     print(
         f"Original image prediction: {label} with {confidence * 100:.2f}% confidence.")
 
     print("Saving original image...")
     plt.figure()
-    plt.imshow(image[0] / 255.0)
+    plt.imshow((image[0] + 1) / 2.0)  # Adjust for display
     plt.title(
-        f'{label} : {confidence * 100:.2f}% Confidence\nModel: EfficientNetB0', fontsize=12)
+        f'{label} : {confidence * 100:.2f}% Confidence\nModel: InceptionV3', fontsize=12)
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
@@ -56,7 +56,7 @@ def main(image_path, output_path):
 
     loss_object = tf.keras.losses.CategoricalCrossentropy()
 
-    def create_pgd_adversarial_pattern(input_image, input_label,     epsilon=1.055, alpha=0.25, iterations=40):
+    def create_pgd_adversarial_pattern(input_image, input_label, epsilon=0.015, alpha=0.01, iterations=40):
         print("Generating adversarial pattern using PGD...")
         adversarial_image = tf.identity(input_image)
         for i in range(iterations):
@@ -70,31 +70,29 @@ def main(image_path, output_path):
             adversarial_image = adversarial_image + alpha * signed_grad
             adversarial_image = tf.clip_by_value(
                 adversarial_image, input_image - epsilon, input_image + epsilon)
-            adversarial_image = tf.clip_by_value(adversarial_image, 0, 255)
+            adversarial_image = tf.clip_by_value(adversarial_image, -1.0, 1.0)
             print(f"Iteration {i+1}/{iterations} complete.")
-        return adversarial_image - input_image
+        return adversarial_image
 
     prediction = pretrained_model.predict(image)
-    label = tf.one_hot(tf.argmax(prediction[0]), prediction.shape[-1])
+    label_index = np.argmax(prediction[0])
+    label = tf.one_hot(label_index, prediction.shape[-1])
     label = tf.reshape(label, (1, prediction.shape[-1]))
 
-    perturbations = create_pgd_adversarial_pattern(image, label)
-
-    epsilon = 1.055
-    adv_x = image + epsilon * perturbations
-    adv_x = tf.clip_by_value(adv_x, 0, 255)
+    epsilon = 0.015  # Defined epsilon value
+    adv_x = create_pgd_adversarial_pattern(image, label, epsilon=epsilon)
 
     print("Predicting label for the adversarial image...")
-    _, adv_label, adv_confidence = get_imagenet_label(
-        pretrained_model.predict(adv_x))
+    adv_probs = pretrained_model.predict(adv_x)
+    _, adv_label, adv_confidence = get_imagenet_label(adv_probs)
     print(
         f"Adversarial image prediction: {adv_label} with {adv_confidence * 100:.2f}% confidence.")
 
     print("Saving adversarial image...")
     plt.figure()
-    plt.imshow(adv_x[0] / 255.0)
+    plt.imshow((adv_x[0] + 1) / 2.0)  # Adjust for display
     plt.title(
-        f'{adv_label} : {adv_confidence * 100:.2f}% Confidence\nModel: EfficientNetB0\nMethod: PGD, Epsilon: {epsilon}')
+        f'{adv_label} : {adv_confidence * 100:.2f}% Confidence\nModel: InceptionV3\nMethod: PGD, Epsilon: {epsilon}')
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
@@ -119,6 +117,6 @@ def main(image_path, output_path):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Usage: python pgdVSenet.py <image_path> <output_path>")
+        print("Usage: python pgdVSinception.py <image_path> <output_path>")
         sys.exit(1)
     main(sys.argv[1], sys.argv[2])

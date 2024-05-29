@@ -100,8 +100,9 @@ export default function Home() {
               >
                 <option value="" disabled>Select Model</option>
                 <option value="EfficientNetB0">EfficientNetB0</option>
-                <option value="ResNet50">ResNet50</option>
                 <option value="InceptionV3">InceptionV3</option>
+                <option value="ResNet50">ResNet50</option>
+
                 {/* Add more models as needed */}
               </select>
             </div>
