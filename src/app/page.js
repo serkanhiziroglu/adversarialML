@@ -10,6 +10,7 @@ export default function Home() {
   const [result, setResult] = useState('');
   const [originalImage, setOriginalImage] = useState('');
   const [adversarialImage, setAdversarialImage] = useState('');
+  const [ssim, setSsim] = useState('');  // Add SSIM state
   const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
@@ -29,6 +30,7 @@ export default function Home() {
   const handleMethodChange = (e) => {
     setMethod(e.target.value);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,6 +43,7 @@ export default function Home() {
     setResult('');
     setOriginalImage('');
     setAdversarialImage('');
+    setSsim('');  // Clear SSIM state
 
     const formData = new FormData();
     formData.append('file', file);
@@ -56,6 +59,7 @@ export default function Home() {
       console.log('Response:', response);  // Log the response for debugging
       setOriginalImage(`data:image/png;base64,${response.data.original_image_b64}`);
       setAdversarialImage(`data:image/png;base64,${response.data.adversarial_image_b64}`);
+      setSsim(response.data.ssim);  // Set SSIM value
       setLoading(false);
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -101,9 +105,7 @@ export default function Home() {
                 <option value="" disabled>Select Model</option>
                 <option value="EfficientNetB0">EfficientNetB0</option>
                 <option value="InceptionV3">InceptionV3</option>
-                <option value="ResNet50">ResNet50</option>
-
-                {/* Add more models as needed */}
+                <option value="MobileNetV2">MobileNetV2</option>
               </select>
             </div>
             <div className="flex items-center justify-center space-y-2">
@@ -117,7 +119,6 @@ export default function Home() {
                 <option value="" disabled>Select Adversarial Method</option>
                 <option value="PGD">PGD</option>
                 <option value="FGSM">FGSM</option>
-                {/* Add more methods as needed */}
               </select>
             </div>
           </div>
@@ -151,7 +152,10 @@ export default function Home() {
           <div className="mt-6">
             <h2 className="text-center text-xl font-bold text-gray-900">Adversarial Image:</h2>
             <img src={adversarialImage} alt="Adversarial" className="mt-2" />
-            <div className="pb-10"></div>  {/* Add some padding at the bottom */}
+            <div className="pb-5"></div>
+
+            <p className="mt-2 text-center  font-bold text-sm text-gray-800">SSIM: {ssim}</p> {/* Display SSIM */}
+            <div className="pb-10"></div>
           </div>
         )}
       </div>

@@ -6,10 +6,11 @@ import io
 import base64
 import json
 import os
+from skimage.metrics import structural_similarity as ssim  # Add this import
 
 mpl.rcParams['figure.figsize'] = (8, 8)
 mpl.rcParams['axes.grid'] = False
-mpl.rcParams['savefig.bbox'] = 'tight'  # Remove whitespace
+mpl.rcParams['savefig.bbox'] = 'tight'
 
 
 def main(image_path, output_path):
@@ -56,7 +57,7 @@ def main(image_path, output_path):
 
     loss_object = tf.keras.losses.CategoricalCrossentropy()
 
-    def create_pgd_adversarial_pattern(input_image, input_label, epsilon=0.015, alpha=0.01, iterations=40):
+    def create_pgd_adversarial_pattern(input_image, input_label, epsilon=0.005, alpha=0.01, iterations=40):
         print("Generating adversarial pattern using PGD...")
         adversarial_image = tf.identity(input_image)
         for i in range(iterations):
@@ -79,7 +80,7 @@ def main(image_path, output_path):
     label = tf.one_hot(label_index, prediction.shape[-1])
     label = tf.reshape(label, (1, prediction.shape[-1]))
 
-    epsilon = 0.015  # Defined epsilon value
+    epsilon = 0.010  # Defined epsilon value
     adv_x = create_pgd_adversarial_pattern(image, label, epsilon=epsilon)
 
     print("Predicting label for the adversarial image...")
@@ -100,14 +101,22 @@ def main(image_path, output_path):
     plt.close()
     print("Adversarial image saved successfully.")
 
+    # Convert tensor to numpy array for SSIM calculation
+    original_image_np = ((image[0] + 1) / 2.0).numpy()
+    # Convert tensor to numpy array for SSIM calculation
+    adversarial_image_np = ((adv_x[0] + 1) / 2.0).numpy()
+
+    # Calculate SSIM
+    ssim_value, _ = ssim(original_image_np, adversarial_image_np,
+                         multichannel=True, win_size=3, full=True, channel_axis=-1, data_range=1.0)
+    ssim_value = float(ssim_value)
+    print(f"SSIM between original and adversarial images: {ssim_value}")
+
     result = {
         "original_image_b64": original_image_b64,
-        "adversarial_image_b64": adversarial_image_b64
+        "adversarial_image_b64": adversarial_image_b64,
+        "ssim": ssim_value  # Add SSIM value to the result
     }
-
-    # Output the results to the terminal in the expected format
-    print(f"Original Image Base64: {original_image_b64}")
-    print(f"Adversarial Image Base64: {adversarial_image_b64}")
 
     with open(output_path, 'w') as f:
         json.dump(result, f)
