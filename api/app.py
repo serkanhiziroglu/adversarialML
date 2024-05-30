@@ -65,6 +65,8 @@ def upload_file():
     model_lower = model.lower()
     if model == "MobileNetV2":
         script_name = f"{method.lower()}vs{'mn'}.py"
+    if model == "EfficientNetB0":
+        script_name = f"{method.lower()}vs{'enet'}.py"
     else:
         model_lower = model_lower.replace(
             "b0", "").replace("v3", "").replace("v2", "")
