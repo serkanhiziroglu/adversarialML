@@ -12,7 +12,7 @@ def create_fgsm_adversarial_pattern(model, image, label, epsilon, model_name):
     signed_grad = tf.sign(gradient)
     adversarial_image = image + epsilon * signed_grad
 
-    if model_name.lower() == 'inceptionv3':
+    if model_name.lower() in ['inceptionv3', 'mobilenetv2']:
         adversarial_image = tf.clip_by_value(adversarial_image, -1, 1)
     else:
         adversarial_image = tf.clip_by_value(adversarial_image, 0, 255)

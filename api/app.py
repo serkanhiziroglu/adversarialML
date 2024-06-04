@@ -25,6 +25,9 @@ EPSILON_VALUES = {
     'inceptionv3': {
         'fgsm': 0.015,
         'pgd': 0.0  # Increase epsilon value for a stronger attack
+    },    'mobilenetv2': {
+        'fgsm': 0.015,
+        'pgd': 0.015
     }
 }
 
@@ -32,8 +35,8 @@ EPSILON_VALUES = {
 def save_image(image_tensor, label, confidence, model_name, method_name, epsilon=None):
     fig, ax = plt.subplots(figsize=(8, 8))
 
-    if model_name.lower() == 'inceptionv3':
-        # Adjust for InceptionV3 range and convert to numpy
+    if model_name.lower() in ['inceptionv3', 'mobilenetv2']:
+        # Adjust for InceptionV3 and MobileNetV2 range and convert to numpy
         img = (image_tensor[0].numpy() + 1.0) / 2.0 * 255.0
         img = np.clip(img, 0, 255).astype('uint8')  # Clip to [0, 255] range
     else:
