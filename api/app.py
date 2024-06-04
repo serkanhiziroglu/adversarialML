@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -20,13 +21,26 @@ EPSILON_VALUES = {
     'efficientnetb0': {
         'fgsm': 1.015,
         'pgd': 0.0  # Increase epsilon value for a stronger attack
+    },
+    'inceptionv3': {
+        'fgsm': 0.015,
+        'pgd': 0.0  # Increase epsilon value for a stronger attack
     }
 }
 
 
 def save_image(image_tensor, label, confidence, model_name, method_name, epsilon=None):
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.imshow(image_tensor[0] / 255.0)
+
+    if model_name.lower() == 'inceptionv3':
+        # Adjust for InceptionV3 range and convert to numpy
+        img = (image_tensor[0].numpy() + 1.0) / 2.0 * 255.0
+        img = np.clip(img, 0, 255).astype('uint8')  # Clip to [0, 255] range
+    else:
+        img = image_tensor[0].numpy()  # For other models
+        img = np.clip(img, 0, 255).astype('uint8')  # Clip to [0, 255] range
+
+    ax.imshow(img)
     ax.axis('off')  # Hide the axes
 
     # Adjust layout to create space above the image for the text
@@ -91,10 +105,13 @@ def run_script(image_path, output_path, model_name, method_name):
         # Create adversarial pattern
         if method_name == 'fgsm':
             adv_x = method_module.create_fgsm_adversarial_pattern(
-                model, image, label, epsilon)
+                model, image, label, epsilon, model_name)
         elif method_name == 'pgd':
             adv_x = method_module.create_pgd_adversarial_pattern(
                 model, image, label, model_name)
+
+        print(
+            f"Adversarial pattern created: min {adv_x.numpy().min()}, max {adv_x.numpy().max()}, mean {adv_x.numpy().mean()}")
 
         # Predict adversarial image label
         print("Predicting label for the adversarial image...")
@@ -109,8 +126,13 @@ def run_script(image_path, output_path, model_name, method_name):
             adv_x, adv_label, adv_confidence, model_name, method_name, epsilon)
 
         # Calculate SSIM
-        original_image_np = (image[0] / 255.0).numpy()
-        adversarial_image_np = (adv_x[0] / 255.0).numpy()
+        if model_name.lower() == 'inceptionv3':
+            original_image_np = ((image[0] + 1.0) / 2.0).numpy()
+            adversarial_image_np = ((adv_x[0] + 1.0) / 2.0).numpy()
+        else:
+            original_image_np = (image[0] / 255.0).numpy()
+            adversarial_image_np = (adv_x[0] / 255.0).numpy()
+
         ssim_value = ssim(original_image_np, adversarial_image_np,
                           multichannel=True, data_range=1.0, win_size=3)
         ssim_value = float(ssim_value)

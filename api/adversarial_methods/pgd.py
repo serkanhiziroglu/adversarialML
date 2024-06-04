@@ -8,20 +8,19 @@ def create_pgd_adversarial_pattern(pretrained_model, input_image, input_label, m
     # Set specific epsilon and alpha values based on the model name
     epsilon_values = {
         'efficientnetb0': 1.055,
-        'mobilenetv2': 1.1,
-        'inceptionv3': 1.075
+        'mobilenetv2': 1.0,
+        'inceptionv3': 0.05
     }
 
     alpha_values = {
-        'efficientnetb0': 0.25,
-        'mobilenetv2': 0.3,
-        'inceptionv3': 0.28
+        'efficientnetb0': 0.1,
+        'mobilenetv2': 0.1,
+        'inceptionv3': 0.005
     }
 
-    # Default to 1.055 if model not found
-    epsilon = epsilon_values.get(model_name.lower(), 1.055)
-    # Default to 0.25 if model not found
-    alpha = alpha_values.get(model_name.lower(), 0.25)
+    # Default values if model not found
+    epsilon = epsilon_values.get(model_name.lower(), 1.0)
+    alpha = alpha_values.get(model_name.lower(), 0.1)
     iterations = 40
 
     adversarial_image = tf.identity(input_image)
@@ -36,6 +35,9 @@ def create_pgd_adversarial_pattern(pretrained_model, input_image, input_label, m
         adversarial_image = adversarial_image + alpha * signed_grad
         adversarial_image = tf.clip_by_value(
             adversarial_image, input_image - epsilon, input_image + epsilon)
-        adversarial_image = tf.clip_by_value(adversarial_image, 0, 255)
+        if model_name.lower() == 'inceptionv3':
+            adversarial_image = tf.clip_by_value(adversarial_image, -1, 1)
+        else:
+            adversarial_image = tf.clip_by_value(adversarial_image, 0, 255)
         print(f"Iteration {i+1}/{iterations} complete.")
     return adversarial_image
