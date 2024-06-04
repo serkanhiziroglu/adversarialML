@@ -1,89 +1,102 @@
-import tensorflow as tf
-import matplotlib as mpl
+import os
+import io
+import json
+import base64
+import importlib
 import matplotlib.pyplot as plt
+from skimage.metrics import structural_similarity as ssim
+import tensorflow as tf
 
-mpl.rcParams['figure.figsize'] = (8, 8)
-mpl.rcParams['axes.grid'] = False
+# Set Matplotlib backend to 'Agg' for non-GUI rendering
+plt.switch_backend('Agg')
 
-pretrained_model = tf.keras.applications.MobileNetV2(
-    include_top=True, weights='imagenet')
-pretrained_model.trainable = False
-
-# ImageNet labels
-decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
-
-# Helper function to preprocess the image so that it can be inputted in MobileNetV2
-
-
-def preprocess(image):
-    image = tf.cast(image, tf.float32)
-    image = tf.image.resize(image, (224, 224))
-    image = tf.keras.applications.mobilenet_v2.preprocess_input(image)
-    image = image[None, ...]
-    return image
-
-# Helper function to extract labels from probability vector
+# Dictionary to store epsilon values for different models and methods
+EPSILON_VALUES = {
+    'efficientnetb0': {
+        'fgsm': 5.115
+    }
+}
 
 
-def get_imagenet_label(probs):
-    return decode_predictions(probs, top=1)[0][0]
+def save_image(image_tensor, label, confidence, model_name, method_name, epsilon=None):
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.imshow(image_tensor[0] / 255.0)
+    title = f'{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}'
+    if method_name and epsilon is not None:
+        title += f'\nMethod: {method_name.upper()}, Epsilon: {epsilon}'
+    ax.set_title(title, fontsize=12)
+    ax.axis('off')  # Hide the axes
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight',
+                pad_inches=0)  # Remove whitespace
+    buf.seek(0)
+    image_b64 = base64.b64encode(buf.read()).decode('utf-8')
+    plt.close()
+    return image_b64
 
 
-# Image path for Labrador Retriever
-image_path = tf.keras.utils.get_file(
-    'YellowLabradorLooking_new.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-image_raw = tf.io.read_file(image_path)
-image = tf.image.decode_image(image_raw)
+def main(image_path, output_path):
+    print("Loading EfficientNetB0 model...")
+    model_name = 'efficientnetb0'
+    method_name = 'fgsm'
 
-image = preprocess(image)
-image_probs = pretrained_model.predict(image)
+    model_module = importlib.import_module(f"models.{model_name}")
+    method_module = importlib.import_module(
+        f"adversarial_methods.{method_name}")
 
-plt.figure()
-plt.imshow(image[0] * 0.5 + 0.5)  # To change [-1, 1] to [0,1]
-_, image_class, class_confidence = get_imagenet_label(image_probs)
-plt.title('{} : {:.2f}% Confidence'.format(image_class, class_confidence*100))
-plt.show()
+    model = model_module.load_model()
+    image = model_module.preprocess_image(image_path)
 
-loss_object = tf.keras.losses.CategoricalCrossentropy()
+    decode_predictions = tf.keras.applications.efficientnet.decode_predictions
 
+    def get_imagenet_label(probs):
+        return decode_predictions(probs, top=1)[0][0]
 
-def create_adversarial_pattern(input_image, input_label):
-    with tf.GradientTape() as tape:
-        tape.watch(input_image)
-        prediction = pretrained_model(input_image)
-        loss = loss_object(input_label, prediction)
+    print(f"Reading and preprocessing image from {image_path}...")
+    print("Image loaded and preprocessed successfully.")
 
-    # Get the gradients of the loss w.r.t to the input image.
-    gradient = tape.gradient(loss, input_image)
-    # Get the sign of the gradients to create the perturbation
-    signed_grad = tf.sign(gradient)
-    return signed_grad
+    print("Predicting label for the original image...")
+    image_probs = model.predict(image)
+    _, label, confidence = get_imagenet_label(model.predict(image))
+    print(
+        f"Original image prediction: {label} with {confidence * 100:.2f}% confidence.")
 
+    print("Saving original image...")
+    original_image_b64 = save_image(image, label, confidence, model_name, None)
+    print("Original image saved successfully.")
 
-# Use the model's predicted output as the target label
-prediction = pretrained_model.predict(image)
-label = tf.one_hot(tf.argmax(prediction[0]), prediction.shape[-1])
-label = tf.reshape(label, (1, prediction.shape[-1]))
+    label = tf.one_hot(tf.argmax(image_probs[0]), image_probs.shape[-1])
+    label = tf.reshape(label, (1, image_probs.shape[-1]))
 
-perturbations = create_adversarial_pattern(image, label)
-plt.imshow(perturbations[0] * 0.5 + 0.5)  # To change [-1, 1] to [0,1]
+    epsilon = EPSILON_VALUES.get(model_name, {}).get(
+        method_name, 1.015)  # Default to 0.01 if not found
+    adv_x = method_module.create_fgsm_adversarial_pattern(
+        model, image, label, epsilon)
 
+    print("Predicting label for the adversarial image...")
+    _, adv_label, adv_confidence = get_imagenet_label(model.predict(adv_x))
+    print(
+        f"Adversarial image prediction: {adv_label} with {adv_confidence * 100:.2f}% confidence.")
 
-def display_images(image, description):
-    _, label, confidence = get_imagenet_label(pretrained_model.predict(image))
-    plt.figure()
-    plt.imshow(image[0]*0.5+0.5)
-    plt.title('{} \n {} : {:.2f}% Confidence'.format(
-        description, label, confidence*100))
-    plt.show()
+    print("Saving adversarial image...")
+    adversarial_image_b64 = save_image(
+        adv_x, adv_label, adv_confidence, model_name, method_name, epsilon)
+    print("Adversarial image saved successfully.")
 
+    original_image_np = (image[0] / 255.0).numpy()
+    adversarial_image_np = (adv_x[0] / 255.0).numpy()
 
-epsilons = [0, 0.01, 0.1, 0.15]
+    ssim_value = ssim(original_image_np, adversarial_image_np,
+                      multichannel=True, data_range=1.0, win_size=3)
+    ssim_value = float(ssim_value)
+    print(f"SSIM between original and adversarial images: {ssim_value}")
 
-descriptions = [('Epsilon = {:0.3f}'.format(eps) if eps else 'Input')
-                for eps in epsilons]
+    result = {
+        "original_image_b64": original_image_b64,
+        "adversarial_image_b64": adversarial_image_b64,
+        "ssim": ssim_value
+    }
 
-for i, eps in enumerate(epsilons):
-    adv_x = image + eps*perturbations
-    adv_x = tf.clip_by_value(adv_x, -1, 1)
-    display_images(adv_x, descriptions[i])
+    with open(output_path, 'w') as f:
+        json.dump(result, f)
+    print(f"Results written to {output_path}")

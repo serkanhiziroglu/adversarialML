@@ -119,11 +119,3 @@ def main(image_path, output_path):
     with open(output_path, 'w') as f:
         json.dump(result, f)
     print(f"Results written to {output_path}")
-
-
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 3:
-        print("Usage: python pgdVSenet.py <image_path> <output_path>")
-        sys.exit(1)
-    main(sys.argv[1], sys.argv[2])

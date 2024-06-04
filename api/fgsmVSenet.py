@@ -32,7 +32,7 @@ def main(image_path, output_path):
         return decode_predictions(probs, top=1)[0][0]
 
     print(f"Reading and preprocessing image from {image_path}...")
-    image_raw = tf.io.read_file(image_path)
+    imaage_raw = tf.io.read_file(image_path)
     image = tf.image.decode_image(image_raw, channels=3)
     image = preprocess(image)
     print("Image loaded and preprocessed successfully.")
