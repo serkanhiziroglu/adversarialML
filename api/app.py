@@ -18,7 +18,8 @@ plt.switch_backend('Agg')
 # Dictionary to store epsilon values for different models and methods
 EPSILON_VALUES = {
     'efficientnetb0': {
-        'fgsm': 0.1  # Increase epsilon value for a stronger attack
+        'fgsm': 1.015,
+        'pgd': 0.0  # Increase epsilon value for a stronger attack
     }
 }
 
@@ -88,8 +89,12 @@ def run_script(image_path, output_path, model_name, method_name):
                 f"Method name is not a string: {method_name} (type: {type(method_name)})")
 
         # Create adversarial pattern
-        adv_x = method_module.create_fgsm_adversarial_pattern(
-            model, image, label, epsilon)  # Pass epsilon here
+        if method_name == 'fgsm':
+            adv_x = method_module.create_fgsm_adversarial_pattern(
+                model, image, label, epsilon)
+        elif method_name == 'pgd':
+            adv_x = method_module.create_pgd_adversarial_pattern(
+                model, image, label, model_name)
 
         # Predict adversarial image label
         print("Predicting label for the adversarial image...")
