@@ -59,12 +59,12 @@ const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult,
 
     return (
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-8">
+            <div className="p-8 flex flex-col items-center justify-center">
                 <h2 className="text-5xl font-bold text-center mb-4">Protect your images</h2>
                 <p className="text-center text-gray-600 mb-8">
                     Strengthen your images against adversarial attacks with our easy-to-use protection tools. Upload an image and get your protected image.
                 </p>
-                <div className="bg-gray-50 border border-gray-300 rounded-lg p-8 text-center">
+                <div className="w-full bg-gray-50 border border-gray-300 rounded-lg p-8 text-center">
                     <input
                         type="file"
                         id="file"
@@ -89,7 +89,7 @@ const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult,
                 <form onSubmit={handleSubmit} className="mt-8">
                     <button
                         type="submit"
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                        className="max-w-5xl flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                     >
                         Protect Image
                     </button>

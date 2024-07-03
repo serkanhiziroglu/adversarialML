@@ -4,7 +4,7 @@ import { useState } from 'react';
 import UploadForm from './UploadForm';
 import ResultDisplay from './ResultDisplay';
 import InfoSection from './InfoSection';
-import RootLayout from './layout'; // Import RootLayout to pass handleTryAgain
+import RootLayout from './layout';
 import { CSSTransition } from 'react-transition-group';
 
 export default function Home() {
@@ -23,6 +23,8 @@ export default function Home() {
     setFormSubmitted(false);
     window.scrollTo(0, 0);
   };
+
+
 
   return (
     <RootLayout handleTryAgain={resetForm}>
