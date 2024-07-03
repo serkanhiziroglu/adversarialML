@@ -1,30 +1,37 @@
-// InfoSection.js
-const InfoSection = () => {
-    return (
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <h3 className="mt-2 text-xl font-semibold">Upload an image</h3>
-                <p className="mt-1 text-gray-500">Select or drag and drop your image into the upload area.</p>
+const InfoSection = () => (
+    <div className="max-w-6xl mx-auto mt-12 bg-white rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center">How to protect an image</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center">
+                <div className="bg-purple-100 rounded-lg p-3 mb-4">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z" />
+                        <path d="M9 13h2v5a1 1 0 11-2 0v-5z" />
+                    </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Upload an image</h3>
+                <p className="text-gray-600 text-center">Select the "Upload your image" button or easily drag and drop your files into the section.</p>
             </div>
-            <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <h3 className="mt-2 text-xl font-semibold">Protect image</h3>
-                <p className="mt-1 text-gray-500">Our AI strengthens your image against adversarial attacks.</p>
+            <div className="flex flex-col items-center">
+                <div className="bg-purple-100 rounded-lg p-3 mb-4">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Protect image</h3>
+                <p className="text-gray-600 text-center">Our AI strengthens your image against adversarial attacks.</p>
             </div>
-            <div className="text-center">
-                <svg className="mx-auto h-12 w-12 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <h3 className="mt-2 text-xl font-semibold">Download protected image</h3>
-                <p className="mt-1 text-gray-500">Get your reinforced image ready for use.</p>
+            <div className="flex flex-col items-center">
+                <div className="bg-purple-100 rounded-lg p-3 mb-4">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Download protected image</h3>
+                <p className="text-gray-600 text-center">Get your reinforced image ready for use.</p>
             </div>
         </div>
-    );
-};
+    </div>
+);
 
 export default InfoSection;

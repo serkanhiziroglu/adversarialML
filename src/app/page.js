@@ -1,10 +1,11 @@
-// page.js
 "use client";
 
 import { useState } from 'react';
 import UploadForm from './UploadForm';
 import ResultDisplay from './ResultDisplay';
 import InfoSection from './InfoSection';
+import RootLayout from './layout'; // Import RootLayout to pass handleTryAgain
+import { CSSTransition } from 'react-transition-group';
 
 export default function Home() {
   const [originalImage, setOriginalImage] = useState('');
@@ -14,14 +15,25 @@ export default function Home() {
   const [result, setResult] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
 
+  const resetForm = () => {
+    setOriginalImage('');
+    setAdversarialImage('');
+    setSsim('');
+    setResult('');
+    setFormSubmitted(false);
+    window.scrollTo(0, 0);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="bg-white bg-opacity-90 shadow-lg rounded-lg p-8 max-w-4xl mx-auto">
-        {!formSubmitted ? (
-          <>
-            <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-              Strengthen your images against adversarial attacks with our easy-to-use protection tools.
-            </h2>
+    <RootLayout handleTryAgain={resetForm}>
+      <div className="min-h-screen">
+        <CSSTransition
+          in={!formSubmitted}
+          timeout={300}
+          classNames="fade"
+          unmountOnExit
+        >
+          <div>
             <UploadForm
               setOriginalImage={setOriginalImage}
               setAdversarialImage={setAdversarialImage}
@@ -31,18 +43,24 @@ export default function Home() {
               setFormSubmitted={setFormSubmitted}
             />
             <InfoSection />
-          </>
-        ) : (
+          </div>
+        </CSSTransition>
+        <CSSTransition
+          in={formSubmitted}
+          timeout={300}
+          classNames="fade"
+          unmountOnExit
+        >
           <ResultDisplay
             loading={loading}
             originalImage={originalImage}
             adversarialImage={adversarialImage}
             ssim={ssim}
             result={result}
-            setFormSubmitted={setFormSubmitted}
+            resetForm={resetForm}
           />
-        )}
+        </CSSTransition>
       </div>
-    </div>
+    </RootLayout>
   );
 }

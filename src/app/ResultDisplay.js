@@ -1,9 +1,7 @@
 "use client";
 
-import { CSSTransition } from 'react-transition-group';
-import 'tailwindcss/tailwind.css';
+const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result, resetForm }) => {
 
-const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result, setFormSubmitted }) => {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             {loading && (
@@ -37,7 +35,7 @@ const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result,
                     <div className="flex items-center justify-center mt-4">
                         <button
                             className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            onClick={() => setFormSubmitted(false)}
+                            onClick={resetForm}
                         >
                             Try Again
                         </button>
