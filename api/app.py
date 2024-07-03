@@ -36,26 +36,25 @@ def save_image(image_tensor, label, confidence, model_name, method_name, epsilon
     fig, ax = plt.subplots(figsize=(8, 8))
 
     if model_name.lower() in ['inceptionv3', 'mobilenetv2']:
-        # Adjust for InceptionV3 and MobileNetV2 range and convert to numpy
         img = (image_tensor[0].numpy() + 1.0) / 2.0 * 255.0
-        img = np.clip(img, 0, 255).astype('uint8')  # Clip to [0, 255] range
+        img = np.clip(img, 0, 255).astype('uint8')
     else:
-        img = image_tensor[0].numpy()  # For other models
-        img = np.clip(img, 0, 255).astype('uint8')  # Clip to [0, 255] range
-
+        img = image_tensor[0].numpy()
+        img = np.clip(img, 0, 255).astype('uint8')
     ax.imshow(img)
-    ax.axis('off')  # Hide the axes
+    ax.axis('off')
 
-    # Adjust layout to create space above the image for the text
     plt.subplots_adjust(top=0.8)
 
-    # Title text
-    title = f'\nEpsilon: {epsilon}\n{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}\nMethod: {method_name.upper()}'
+    if epsilon is None or (epsilon == 0 and method_name.lower() == 'original'):
+        title = f'\n{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}\nMethod: {method_name.upper()}'
+    else:
+        title = f'\nEpsilon: {epsilon}\n{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}\nMethod: {method_name.upper()}'
+
     fig.suptitle(title, fontsize=12, va='top', ha='center', y=0.95)
 
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight',
-                pad_inches=0.1)  # Remove whitespace
+    plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1)
     buf.seek(0)
     image_b64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
