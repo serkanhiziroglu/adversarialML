@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from 'react';
-import UploadForm from './UploadForm';
-import ResultDisplay from './ResultDisplay';
-import InfoSection from './InfoSection';
-import RootLayout from './layout';
-import { CSSTransition } from 'react-transition-group';
+import UploadForm from '../components/UploadForm';
+import ResultDisplay from '../components/ResultDisplay';
+import InfoSection from '../components/InfoSection';
+import { Header } from '../components/Header';
+import Footer from '../components/Footer';  // Import the new Footer component
 
 export default function Home() {
   const [originalImage, setOriginalImage] = useState('');
@@ -24,17 +24,11 @@ export default function Home() {
     window.scrollTo(0, 0);
   };
 
-
-
   return (
-    <RootLayout handleTryAgain={resetForm}>
-      <div className="min-h-screen">
-        <CSSTransition
-          in={!formSubmitted}
-          timeout={300}
-          classNames="fade"
-          unmountOnExit
-        >
+    <div className="flex flex-col min-h-screen">
+      <Header onReset={resetForm} />
+      <main className="flex-grow">
+        {!formSubmitted && (
           <div>
             <UploadForm
               setOriginalImage={setOriginalImage}
@@ -46,13 +40,8 @@ export default function Home() {
             />
             <InfoSection />
           </div>
-        </CSSTransition>
-        <CSSTransition
-          in={formSubmitted}
-          timeout={300}
-          classNames="fade"
-          unmountOnExit
-        >
+        )}
+        {formSubmitted && (
           <ResultDisplay
             loading={loading}
             originalImage={originalImage}
@@ -61,8 +50,9 @@ export default function Home() {
             result={result}
             resetForm={resetForm}
           />
-        </CSSTransition>
-      </div>
-    </RootLayout>
+        )}
+      </main>
+      <Footer />
+    </div>
   );
 }

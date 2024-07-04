@@ -5,7 +5,13 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['var(--font-montserrat)', 'sans-serif'],
+        'playwrite': ['"Playwrite GB S"', 'sans-serif'],
+        'comfortaa': ['Comfortaa', 'cursive'],
+      },
+    },
   },
   plugins: [],
 };
