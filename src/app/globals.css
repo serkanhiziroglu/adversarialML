@@ -99,7 +99,7 @@ body {
 
 /* styles.css */
 .bg-form {
-  background-image: url('/form-bg.png');
+  background-image: url('/form-bg-2.png');
   background-size: cover;
   background-position: center;
   position: relative;
@@ -126,4 +126,22 @@ body {
 
 body {
   font-family: 'Playwrite GB S', sans-serif;
+}
+
+.page-transition-enter {
+  opacity: 0;
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
 }

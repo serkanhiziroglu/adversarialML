@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
-const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult, setFormSubmitted }) => {
+const UploadForm = () => {
     const [file, setFile] = useState(null);
     const [model] = useState('EfficientNetB0');
     const [method] = useState('FGSM');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const router = useRouter();
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -29,10 +31,6 @@ const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult,
         }
 
         setLoading(true);
-        setResult('');
-        setOriginalImage('');
-        setAdversarialImage('');
-        setSsim('');
 
         const formData = new FormData();
         formData.append('file', file);
@@ -45,14 +43,15 @@ const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult,
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            setOriginalImage(`data:image/png;base64,${response.data.original_image_b64}`);
-            setAdversarialImage(`data:image/png;base64,${response.data.adversarial_image_b64}`);
-            setSsim(response.data.ssim);
-            setLoading(false);
-            setFormSubmitted(true);
+
+            // Store the response data in localStorage
+            localStorage.setItem('resultData', JSON.stringify(response.data));
+
+            // Redirect to the results page
+            router.push('/result');
         } catch (error) {
             console.error('Error uploading file:', error);
-            setResult('Error uploading file');
+            setError('Error uploading file');
             setLoading(false);
         }
     };
@@ -60,8 +59,8 @@ const UploadForm = ({ setOriginalImage, setAdversarialImage, setSsim, setResult,
     return (
         <div className="max-w-6xl mx-auto mt-8">
             <div
-                className=" shadow-lg rounded-xl overflow-hidden"
-                style={{ backgroundImage: 'url(/form-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                className="shadow-lg rounded-xl overflow-hidden"
+                style={{ backgroundImage: 'url(/form-bg-2.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
             >
                 <div className="px-8 py-12 sm:px-12 sm:py-16">
                     <div className="bg-white bg-opacity-80 backdrop-blur-sm backdrop-filter flex items-center flex-col border border-gray-200 rounded-xl px-8 py-6 max-w-3xl mx-auto">
