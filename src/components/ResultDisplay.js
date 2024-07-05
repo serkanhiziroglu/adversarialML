@@ -1,5 +1,3 @@
-"use client";
-
 const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result, resetForm }) => {
 
     return (
@@ -15,13 +13,13 @@ const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result,
                     {originalImage && (
                         <div className="mt-6">
                             <h2 className="text-center text-xl font-bold text-gray-900">Original Image:</h2>
-                            <img src={originalImage} alt="Original" className="mt-2 animate-fade-in" />
+                            <img src={originalImage} alt="Original" className="mt-2" />
                         </div>
                     )}
                     {adversarialImage && (
                         <div className="mt-6">
                             <h2 className="text-center text-xl font-bold text-gray-900">Adversarial Image:</h2>
-                            <img src={adversarialImage} alt="Adversarial" className="mt-2 animate-fade-in" />
+                            <img src={adversarialImage} alt="Adversarial" className="mt-2" />
                             <p className="mt-2 mb-4 text-center font-bold text-sm text-gray-800">SSIM: {ssim}</p>
                             <div className="pb-10"></div>
                         </div>

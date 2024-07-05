@@ -1,7 +1,9 @@
-import './globals.css'
+// src/app/layout.js
+import './globals.css';
+import { Header } from '../components/Header';
+import Footer from '../components/Footer';
+import PageWrapper from './PageWrapper';
 import { Montserrat } from 'next/font/google'
-import { Header } from '../components/Header'
-import Footer from '../components/Footer'
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -11,20 +13,14 @@ const montserrat = Montserrat({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`font-playwrite ${montserrat.variable}`}>
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playwrite+GB+S&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${montserrat.variable}`}  >
       <body className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
-          {children}
+          <PageWrapper>{children}</PageWrapper>
         </main>
         <Footer />
       </body>
     </html>
-  )
+  );
 }

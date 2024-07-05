@@ -60,7 +60,7 @@ const UploadForm = () => {
         <div className="max-w-6xl mx-auto mt-8">
             <div
                 className="shadow-lg rounded-xl overflow-hidden"
-                style={{ backgroundImage: 'url(/form-bg-2.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                style={{ backgroundImage: 'url(/form-bg-4.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
             >
                 <div className="px-8 py-12 sm:px-12 sm:py-16">
                     <div className="bg-white bg-opacity-80 backdrop-blur-sm backdrop-filter flex items-center flex-col border border-gray-200 rounded-xl px-8 py-6 max-w-3xl mx-auto">
