@@ -34,8 +34,6 @@ const UploadForm = () => {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('model', model);
-        formData.append('method', method);
 
         try {
             const response = await axios.post('http://localhost:5000/upload', formData, {

@@ -1,194 +1,180 @@
-import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
-import json
-import importlib
 import tensorflow as tf
-from skimage.metrics import structural_similarity as ssim
-import io
+import numpy as np
 import base64
-import matplotlib.pyplot as plt
+from PIL import Image
+import cv2
+from skimage.metrics import structural_similarity as ssim
+
+from models import efficientnetb0, inceptionv3, mobilenetv2
+from adversarial_methods import fgsm, pgd
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
-# Set Matplotlib backend to 'Agg' for non-GUI rendering
-plt.switch_backend('Agg')
-
-# Dictionary to store epsilon values for different models and methods
-EPSILON_VALUES = {
-    'efficientnetb0': {
-        'fgsm': 1.015,
-        'pgd': 0.0  # Increase epsilon value for a stronger attack
-    },
-    'inceptionv3': {
-        'fgsm': 0.015,
-        'pgd': 0.0  # Increase epsilon value for a stronger attack
-    },    'mobilenetv2': {
-        'fgsm': 0.015,
-        'pgd': 0.015
-    }
-}
+# Load models
+efficientnet_model = efficientnetb0.load_model()
+inceptionv3_model = inceptionv3.load_model()
+mobilenetv2_model = mobilenetv2.load_model()
 
 
-def save_image(image_tensor, label, confidence, model_name, method_name, epsilon=None):
-    fig, ax = plt.subplots(figsize=(8, 8))
+def preprocess_image(image):
+    # Convert PIL Image to numpy array
+    image_array = np.array(image)
 
-    if model_name.lower() in ['inceptionv3', 'mobilenetv2']:
-        img = (image_tensor[0].numpy() + 1.0) / 2.0 * 255.0
-        img = np.clip(img, 0, 255).astype('uint8')
-    else:
-        img = image_tensor[0].numpy()
-        img = np.clip(img, 0, 255).astype('uint8')
-    ax.imshow(img)
-    ax.axis('off')
+    # Normalize pixel values to [0, 1]
+    image_array = image_array.astype(np.float32) / 255.0
 
-    plt.subplots_adjust(top=0.8)
+    # Add batch dimension and convert to TensorFlow tensor
+    image_tensor = tf.convert_to_tensor(np.expand_dims(image_array, axis=0))
 
-    if epsilon is None or (epsilon == 0 and method_name.lower() == 'original'):
-        title = f'\n{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}\nMethod: {method_name.upper()}'
-    else:
-        title = f'\nEpsilon: {epsilon}\n{label} : {confidence * 100:.2f}% Confidence\nModel: {model_name}\nMethod: {method_name.upper()}'
-
-    fig.suptitle(title, fontsize=12, va='top', ha='center', y=0.95)
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.1)
-    buf.seek(0)
-    image_b64 = base64.b64encode(buf.read()).decode('utf-8')
-    plt.close()
-    return image_b64
+    return image_tensor
 
 
-def run_script(image_path, output_path, model_name, method_name):
-    try:
-        print(
-            f"Running script with model_name: {model_name} (type: {type(model_name)}) and method_name: {method_name} (type: {type(method_name)})")
+def calculate_ssim(image1, image2):
+    # Calculate the minimum dimension of the images
+    min_dim = min(image1.shape[0], image1.shape[1],
+                  image2.shape[0], image2.shape[1])
 
-        # Import model and method modules
-        model_module = importlib.import_module(f"models.{model_name}")
-        method_module = importlib.import_module(
-            f"adversarial_methods.{method_name}")
+    # Set win_size to be odd and smaller than the minimum dimension
+    win_size = min(7, min_dim - 1)
+    if win_size % 2 == 0:
+        win_size -= 1
 
-        # Load model and preprocess image
-        model = model_module.load_model()
-        image = model_module.preprocess_image(image_path)
-
-        # Predict original image label
-        print("Predicting label for the original image...")
-        image_probs = model.predict(image)
-        _, label, confidence = model_module.get_imagenet_label(image_probs)
-        print(
-            f"Original image prediction: {label} with {confidence * 100:.2f}% confidence.")
-
-        # Save original image
-        print("Saving original image...")
-        original_image_b64 = save_image(
-            image, label, confidence, model_name, "original")
-
-        # Prepare label for adversarial pattern
-        label = tf.one_hot(tf.argmax(image_probs[0]), image_probs.shape[-1])
-        label = tf.reshape(label, (1, image_probs.shape[-1]))
-
-        # Get epsilon value
-        epsilon = EPSILON_VALUES.get(model_name, {}).get(method_name, 0.1)
-        print(f"Using increased epsilon: {epsilon} (type: {type(epsilon)})")
-
-        # Check types before passing to create_fgsm_adversarial_pattern
-        if not isinstance(epsilon, float):
-            raise ValueError(
-                f"Epsilon value is not a float: {epsilon} (type: {type(epsilon)})")
-
-        if not isinstance(method_name, str):
-            raise ValueError(
-                f"Method name is not a string: {method_name} (type: {type(method_name)})")
-
-        # Create adversarial pattern
-        if method_name == 'fgsm':
-            adv_x = method_module.create_fgsm_adversarial_pattern(
-                model, image, label, epsilon, model_name)
-        elif method_name == 'pgd':
-            adv_x = method_module.create_pgd_adversarial_pattern(
-                model, image, label, model_name)
-
-        print(
-            f"Adversarial pattern created: min {adv_x.numpy().min()}, max {adv_x.numpy().max()}, mean {adv_x.numpy().mean()}")
-
-        # Predict adversarial image label
-        print("Predicting label for the adversarial image...")
-        _, adv_label, adv_confidence = model_module.get_imagenet_label(
-            model.predict(adv_x))
-        print(
-            f"Adversarial image prediction: {adv_label} with {adv_confidence * 100:.2f}% confidence.")
-
-        # Save adversarial image
-        print("Saving adversarial image...")
-        adversarial_image_b64 = save_image(
-            adv_x, adv_label, adv_confidence, model_name, method_name, epsilon)
-
-        # Calculate SSIM
-        if model_name.lower() == 'inceptionv3':
-            original_image_np = ((image[0] + 1.0) / 2.0).numpy()
-            adversarial_image_np = ((adv_x[0] + 1.0) / 2.0).numpy()
-        else:
-            original_image_np = (image[0] / 255.0).numpy()
-            adversarial_image_np = (adv_x[0] / 255.0).numpy()
-
-        ssim_value = ssim(original_image_np, adversarial_image_np,
-                          multichannel=True, data_range=1.0, win_size=3)
-        ssim_value = float(ssim_value)
-        print(f"SSIM between original and adversarial images: {ssim_value}")
-
-        # Prepare result
-        result = {
-            "original_image_b64": original_image_b64,
-            "adversarial_image_b64": adversarial_image_b64,
-            "ssim": ssim_value
-        }
-
-        # Write result to output path
-        with open(output_path, 'w') as f:
-            json.dump(result, f)
-        print(f"Results written to {output_path}")
-
-        return result
-    except Exception as e:
-        print(f"Error running script: {e}")
-        return None
+    return ssim(image1, image2, win_size=win_size, channel_axis=-1)
 
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
-    model = request.form['model']
-    method = request.form['method']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
 
-    # Print the types and values of model and method for debugging
-    print(f"Received model: {model} (type: {type(model)})")
-    print(f"Received method: {method} (type: {type(method)})")
+    # Check if the file has an allowed extension
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return jsonify({'error': 'Invalid file type'}), 400
 
     try:
-        # Ensure model and method are strings
-        model = str(model).lower()
-        method = str(method).lower()
+        # Try to open the image
+        image = Image.open(file.stream)
+
+        # Verify it's actually an image
+        image.verify()
+
+        # Rewind the file stream
+        file.stream.seek(0)
+
+        # Open the image again (because verify() closes the file)
+        image = Image.open(file.stream).convert('RGB')
     except Exception as e:
-        print(f"Error converting model or method to string: {e}")
+        # If there's any error in opening the image, return an error message
+        return jsonify({'error': f'Error processing image: {str(e)}'}), 400
 
-    print(f"Processed model: {model} (type: {type(model)})")
-    print(f"Processed method: {method} (type: {type(method)})")
+    # Preprocess the image
+    preprocessed_image = preprocess_image(image)
 
-    image_path = os.path.join('/tmp', file.filename)
-    file.save(image_path)
+    # Generate adversarial image
+    epsilon = 0.01  # You may need to adjust this value
+    adversarial_image = fgsm.create_fgsm_adversarial_pattern(
+        preprocessed_image, epsilon)
 
-    output_path = os.path.join('/tmp', 'output.json')
+    # Convert back to uint8 for saving and SSIM calculation
+    original_image_uint8 = np.array(image)
+    adversarial_image_uint8 = (
+        adversarial_image[0] * 255).numpy().astype(np.uint8)
 
-    result = run_script(image_path, output_path, model, method)
+    # Calculate SSIM
+    ssim_value = calculate_ssim(original_image_uint8, adversarial_image_uint8)
 
-    if result is None:
-        return jsonify({'error': 'Error processing images'}), 500
+    # Encode image to base64
+    _, buffer = cv2.imencode('.png', cv2.cvtColor(
+        adversarial_image_uint8, cv2.COLOR_RGB2BGR))
+    adversarial_image_b64 = base64.b64encode(buffer).decode('utf-8')
 
-    return jsonify(result)
+    return jsonify({
+        'adversarial_image_b64': adversarial_image_b64,
+        'ssim': f"{ssim_value:.4f}"
+    })
+
+
+@app.route('/advanced-testing', methods=['POST'])
+def advanced_testing():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    model_name = request.form.get('model', 'EfficientNetB0')
+
+    # Check if the file has an allowed extension
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
+        return jsonify({'error': 'Invalid file type'}), 400
+
+    try:
+        # Try to open the image
+        image = Image.open(file.stream)
+
+        # Verify it's actually an image
+        image.verify()
+
+        # Rewind the file stream
+        file.stream.seek(0)
+
+        # Open the image again (because verify() closes the file)
+        image = Image.open(file.stream).convert('RGB')
+    except Exception as e:
+        # If there's any error in opening the image, return an error message
+        return jsonify({'error': f'Error processing image: {str(e)}'}), 400
+
+    # Resize and preprocess the image based on the selected model
+    if model_name == 'EfficientNetB0':
+        model = efficientnet_model
+        target_size = (224, 224)
+    elif model_name == 'InceptionV3':
+        model = inceptionv3_model
+        target_size = (299, 299)
+    else:  # MobileNetV2
+        model = mobilenetv2_model
+        target_size = (224, 224)
+
+    # Resize the image
+    resized_image = image.resize(target_size)
+
+    # Convert to numpy array and preprocess
+    img_array = np.array(resized_image)
+    img_array = img_array.astype(np.float32) / 255.0  # Normalize to [0, 1]
+    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+
+    # Make prediction
+    prediction = model.predict(img_array)
+    predicted_label = get_predictions(img_array, model_name)
+
+    # Encode original image to base64
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+
+    return jsonify({
+        'original_image_b64': img_str,
+        'prediction': predicted_label
+    })
+
+# Update the get_predictions function to handle the preprocessed image directly
+
+
+def get_predictions(image, model_name):
+    if model_name == 'EfficientNetB0':
+        return efficientnetb0.get_imagenet_label(efficientnet_model.predict(image))
+    elif model_name == 'InceptionV3':
+        return inceptionv3.get_imagenet_label(inceptionv3_model.predict(image))
+    elif model_name == 'MobileNetV2':
+        return mobilenetv2.get_imagenet_label(mobilenetv2_model.predict(image))
 
 
 if __name__ == '__main__':

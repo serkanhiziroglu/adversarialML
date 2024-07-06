@@ -10,15 +10,15 @@ def load_model():
     return model
 
 
-def preprocess_image(image_path):
-    image_raw = tf.io.read_file(image_path)
-    image = tf.image.decode_image(image_raw, channels=3)
+def preprocess_image(image):
+    # Adjust size as needed for each model
     image = tf.image.resize(image, (224, 224))
-    image = tf.cast(image, tf.float32)
-    image = image[None, ...]
-    return image
+    # Use the appropriate preprocess_input function for each model
+    image = tf.keras.applications.efficientnet.preprocess_input(image)
+    return image[tf.newaxis, ...]
 
 
-def get_imagenet_label(probs):
-    decode_predictions = tf.keras.applications.efficientnet.decode_predictions
-    return decode_predictions(probs, top=1)[0][0]
+def get_imagenet_label(pred_array):
+    decoded_predictions = tf.keras.applications.efficientnet.decode_predictions(
+        pred_array, top=1)[0]
+    return decoded_predictions[0][1]  # Return the class name

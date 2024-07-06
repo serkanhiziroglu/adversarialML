@@ -14,15 +14,12 @@ def load_model():
         return None
 
 
-def preprocess_image(image_path):
-    image_raw = tf.io.read_file(image_path)
-    image = tf.image.decode_image(image_raw, channels=3)
-    # InceptionV3 expects 299x299 images
-    image = tf.image.resize(image, (299, 299))
-    image = tf.cast(image, tf.float32)
-    image = tf.keras.applications.inception_v3.preprocess_input(image)
-    image = image[None, ...]
-    return image
+def preprocess_image(image):
+    # Adjust size as needed for each model
+    image = tf.image.resize(image, (224, 224))
+    # Use the appropriate preprocess_input function for each model
+    image = tf.keras.applications.efficientnet.preprocess_input(image)
+    return image[tf.newaxis, ...]
 
 
 def get_imagenet_label(probs):

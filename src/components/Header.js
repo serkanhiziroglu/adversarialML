@@ -15,6 +15,11 @@ export const Header = () => (
                             </Link>
                         </li>
                         <li className="relative group">
+                            <Link href="/advanced-testing" className="rounded-lg  active:bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition duration-200">
+                                Advanced Testing
+                            </Link>
+                        </li>
+                        <li className="relative group">
                             <Link href="/faq" className="rounded-lg  active:bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition duration-200">
                                 FAQ
                             </Link>
