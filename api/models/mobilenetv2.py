@@ -12,13 +12,15 @@ def load_model():
 
 
 def preprocess_image(image):
-    # Adjust size as needed for each model
-    image = tf.image.resize(image, (224, 224))
-    # Use the appropriate preprocess_input function for each model
-    image = tf.keras.applications.efficientnet.preprocess_input(image)
-    return image[tf.newaxis, ...]
+    image = image.resize((224, 224))
+    image_array = tf.keras.preprocessing.image.img_to_array(image)
+    image_array = tf.keras.applications.mobilenet_v2.preprocess_input(
+        image_array)
+    return tf.expand_dims(image_array, 0)
 
 
-def get_imagenet_label(probs):
-    decode_predictions = tf.keras.applications.mobilenet_v2.decode_predictions
-    return decode_predictions(probs, top=1)[0][0]
+def get_imagenet_label(pred_array):
+    decoded_predictions = tf.keras.applications.efficientnet.decode_predictions(
+        pred_array, top=1)[0]
+    # Return (class_name, confidence)
+    return decoded_predictions[0][1], decoded_predictions[0][2]
