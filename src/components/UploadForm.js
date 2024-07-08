@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import './ProtectButton.css'; // Import the CSS file for the button
 
 const UploadForm = () => {
     const [file, setFile] = useState(null);
@@ -46,20 +49,37 @@ const UploadForm = () => {
             router.push('/result');
         } catch (error) {
             console.error('Error uploading file:', error);
-            setError('Error uploading file');
+            let errorMessage = 'Error uploading file';
+
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                errorMessage = error.response.data.message || error.response.statusText;
+            } else if (error.request) {
+                // The request was made but no response was received
+                errorMessage = 'No response received from server. Please check your connection.';
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                errorMessage = error.message;
+            }
+
+            setError(errorMessage);
             setLoading(false);
         }
     };
-
     return (
         <div className="max-w-6xl mx-auto mt-8">
-            <div
-                className="shadow-lg rounded-xl overflow-hidden"
-                style={{ backgroundImage: 'url(/form-bg-3.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-            >
-                <div className="px-8 py-12 sm:px-12 sm:py-16">
+            <div className="shadow-lg rounded-xl overflow-hidden relative">
+                <Image
+                    src="/form-bg-11.png"
+                    alt="Background"
+                    layout="fill"
+                    objectFit="cover"
+                    quality={100}
+                    priority
+                />
+                <div className="px-8 py-12 sm:px-12 sm:py-16 relative z-10">
                     <div className="bg-white bg-opacity-80 backdrop-blur-sm backdrop-filter flex items-center justify-center border border-gray-200 rounded-xl px-6 py-4 max-w-3xl mx-auto transition-all duration-300 hover:bg-opacity-90 group relative">
-                        {/* Extra div for dotted line */}
                         <div className="absolute inset-2 border border-dashed border-transparent group-hover:border-gray-300 rounded-lg pointer-events-none"></div>
 
                         <div className="w-full h-full flex flex-col items-center justify-center z-10 px-4 py-8">
@@ -67,16 +87,22 @@ const UploadForm = () => {
                             <p className="text-gray-600 mb-6 text-center">
                                 Strengthen your images against adversarial attacks with our easy-to-use protection tools. Upload an image and get your protected image.
                             </p>
-                            <div className="flex flex-col items-center">
+                            <motion.div
+                                id="file-selector-container"
+                                initial={{ y: 50, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.5, ease: 'easeInOut' }}
+                                className="flex flex-col items-center"
+                            >
                                 <input
                                     type="file"
-                                    id="file"
+                                    id="file-selector"
                                     accept="image/*"
                                     onChange={handleFileChange}
                                     className="hidden"
                                 />
                                 <label
-                                    htmlFor="file"
+                                    htmlFor="file-selector"
                                     className="mb-2 inline-flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                                 >
                                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -86,15 +112,26 @@ const UploadForm = () => {
                                     Upload your image
                                 </label>
                                 <p className="text-sm text-gray-500 mb-2">or drop it here</p>
-                                {file && <p className="text-sm text-gray-600 mb-2">Selected file: {file.name}</p>}
-                                {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
-                                <button
+                                <motion.button
+                                    whileHover={{
+                                        y: [0, -2, 0], // Moves the button up and down
+                                        transition: { yoyo: Infinity, duration: 0.5 },
+                                    }}
                                     onClick={handleSubmit}
-                                    className="px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                                    className="button-49 mt-4"
                                 >
                                     Protect Image
-                                </button>
-                            </div>
+                                </motion.button>
+                            </motion.div>
+                            {(error || file) && (
+                                <p className="text-sm mt-2 absolute bottom-5">
+                                    {error ? (
+                                        <span className="text-red-600">{error}</span>
+                                    ) : (
+                                        <span className="text-gray-600">Selected file: {file.name}</span>
+                                    )}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>

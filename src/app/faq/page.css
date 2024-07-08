@@ -1,0 +1,52 @@
+/* pages/faq/page.css */
+.faq-section {
+    background: #fdfdfd;
+    min-height: 100vh;
+    padding: 10vh 0 0;
+}
+
+.faq {
+    background: #FFFFFF;
+    box-shadow: 0 2px 48px 0 rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+}
+
+.card {
+    border: none;
+    background: none;
+    border-bottom: 1px dashed #CEE1F8;
+}
+
+.card-header {
+    padding: 0px;
+    border: none;
+    background: none;
+    transition: all 0.3s ease 0s;
+}
+
+.card-header:hover {
+    background: rgba(233, 30, 99, 0.1);
+    padding-left: 10px;
+}
+
+.faq-title {
+    width: 100%;
+    text-align: left;
+    padding: 20px 30px;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: #3B566E;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+}
+
+.card-body {
+    padding: 30px 35px 16px;
+    font-weight: 400;
+    font-size: 16px;
+    color: #6F8BA4;
+    line-height: 28px;
+    letter-spacing: 1px;
+    border-top: 1px solid #F3F8FF;
+}

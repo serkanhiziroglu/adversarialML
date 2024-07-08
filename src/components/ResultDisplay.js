@@ -1,5 +1,6 @@
-const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result, resetForm }) => {
+import Image from 'next/image';
 
+const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result, resetForm }) => {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             {loading && (
@@ -13,13 +14,27 @@ const ResultDisplay = ({ loading, originalImage, adversarialImage, ssim, result,
                     {originalImage && (
                         <div className="mt-6">
                             <h2 className="text-center text-xl font-bold text-gray-900">Original Image:</h2>
-                            <img src={originalImage} alt="Original" className="mt-2" />
+                            <div className="mt-2 relative w-full h-64">
+                                <Image
+                                    src={originalImage}
+                                    alt="Original"
+                                    layout="fill"
+                                    objectFit="contain"
+                                />
+                            </div>
                         </div>
                     )}
                     {adversarialImage && (
                         <div className="mt-6">
                             <h2 className="text-center text-xl font-bold text-gray-900">Adversarial Image:</h2>
-                            <img src={adversarialImage} alt="Adversarial" className="mt-2" />
+                            <div className="mt-2 relative w-full h-64">
+                                <Image
+                                    src={adversarialImage}
+                                    alt="Adversarial"
+                                    layout="fill"
+                                    objectFit="contain"
+                                />
+                            </div>
                             <p className="mt-2 mb-4 text-center font-bold text-sm text-gray-800">SSIM: {ssim}</p>
                             <div className="pb-10"></div>
                         </div>

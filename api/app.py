@@ -15,12 +15,6 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 
-# Load models
-efficientnet_model = efficientnetb0.load_model()
-inceptionv3_model = inceptionv3.load_model()
-mobilenetv2_model = mobilenetv2.load_model()
-
-
 def preprocess_image(image):
     image_array = np.array(image)
     image_array = image_array.astype(np.float32) / 255.0
@@ -29,12 +23,7 @@ def preprocess_image(image):
 
 
 def calculate_ssim(image1, image2):
-    min_dim = min(image1.shape[0], image1.shape[1],
-                  image2.shape[0], image2.shape[1])
-    win_size = min(7, min_dim - 1)
-    if win_size % 2 == 0:
-        win_size -= 1
-    return ssim(image1, image2, win_size=win_size, channel_axis=-1)
+    return ssim(image1, image2, channel_axis=-1)
 
 
 @app.route('/result', methods=['POST'])
@@ -58,18 +47,23 @@ def upload_file():
     except Exception as e:
         return jsonify({'error': f'Error processing image: {str(e)}'}), 400
 
+    # Preprocess the image
     preprocessed_image = preprocess_image(image)
 
+    # Apply FGSM
     epsilon = 0.01
     adversarial_image = fgsm.create_fgsm_adversarial_pattern(
         preprocessed_image, epsilon)
 
+    # Convert back to uint8 for display and SSIM calculation
     original_image_uint8 = np.array(image)
     adversarial_image_uint8 = (
         adversarial_image[0] * 255).numpy().astype(np.uint8)
 
+    # Calculate SSIM
     ssim_value = calculate_ssim(original_image_uint8, adversarial_image_uint8)
 
+    # Encode to base64
     _, buffer = cv2.imencode('.png', cv2.cvtColor(
         adversarial_image_uint8, cv2.COLOR_RGB2BGR))
     adversarial_image_b64 = base64.b64encode(buffer).decode('utf-8')
@@ -92,6 +86,11 @@ def advanced_testing():
         image = Image.open(file.stream).convert('RGB')
     except Exception as e:
         return jsonify({'error': f'Error processing image: {str(e)}'}), 400
+
+    # Load models only when this route is accessed
+    efficientnet_model = efficientnetb0.load_model()
+    inceptionv3_model = inceptionv3.load_model()
+    mobilenetv2_model = mobilenetv2.load_model()
 
     # Encode original image to base64
     buffered = BytesIO()

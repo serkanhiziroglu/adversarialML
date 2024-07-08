@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import AdvancedTestingForm from '../../components/AdvancedTestingForm';
 
 export default function AdvancedTesting() {
@@ -11,9 +12,9 @@ export default function AdvancedTesting() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className=" px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+                <div className="overflow-hidden">
                     <div className="p-8">
                         <h1 className="text-4xl font-bold text-center mb-6 text-gray-800">Advanced Testing</h1>
                         <p className="text-center text-gray-600 mb-8">
@@ -21,9 +22,14 @@ export default function AdvancedTesting() {
                         </p>
                         <AdvancedTestingForm onResult={handleResult} />
                         {result && (
-                            <div className="mt-12">
-                                <h2 className="text-3xl font-bold mb-6 text-gray-800">Results</h2>
-                                <div className="flex flex-col md:flex-row gap-8">
+                            <motion.div
+                                className="mt-12 bg-white p-8 shadow-lg rounded-lg"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">Results</h2>
+                                <div className="flex flex-col md:flex-row gap-8 items-center">
                                     <div className="flex-1">
                                         <img
                                             src={`data:image/png;base64,${result.original_image_b64}`}
@@ -31,7 +37,7 @@ export default function AdvancedTesting() {
                                             className="w-full h-auto rounded-lg shadow-md"
                                         />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 flex flex-col justify-center">
                                         {Object.entries(result.predictions).map(([modelName, prediction]) => (
                                             <div key={modelName} className="mb-6 bg-gray-50 rounded-lg p-4 shadow">
                                                 <h3 className="text-xl font-semibold mb-2 text-gray-800">{modelName}</h3>
@@ -41,7 +47,7 @@ export default function AdvancedTesting() {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </div>

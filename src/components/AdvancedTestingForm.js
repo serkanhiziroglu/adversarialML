@@ -50,23 +50,24 @@ const AdvancedTestingForm = ({ onResult }) => {
     };
 
     return (
-        <div className="max-w-md mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="file">
-                        Upload Image
-                    </label>
+        <div className="max-w-md mx-auto flex flex-col items-center justify-center">
+            <form onSubmit={handleSubmit} className="space-y-6 w-full">
+                <div className="flex flex-col items-center">
                     <input
                         type="file"
                         id="file"
                         onChange={handleFileChange}
-                        className="block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100"
+                        className="hidden"
                     />
+                    <label
+                        htmlFor="file"
+                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+                    >
+                        Choose File
+                    </label>
+                    <p className="text-sm text-gray-500 mt-2">
+                        {file ? `Selected file: ${file.name}` : 'No file chosen'}
+                    </p>
                 </div>
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <div>
