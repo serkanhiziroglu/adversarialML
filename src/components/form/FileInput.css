@@ -1,0 +1,46 @@
+.uploadButton {
+    background: linear-gradient(-30deg, hwb(330 25% 65%), #4f0d53);    color: #fff;
+    padding: 8px 24px;
+    border: none;
+    border-radius: 5px;
+    /* Changed to 15px as per your request */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.uploadButton:hover {
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.uploadButton:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.uploadButton.click-effect {
+    transform: scale(0.95);
+}
+
+.bounce {
+    animation: bounce 0.3s ease;
+}
+
+@keyframes bounce {
+    0% {
+        transform: scale(0.55);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(5);
+    }
+}

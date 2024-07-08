@@ -31,7 +31,7 @@ const AdvancedTestingForm = ({ onResult }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/advanced-testing', formData, {
+            const response = await axios.post('http://localhost:5000/analyze', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

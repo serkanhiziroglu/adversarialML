@@ -1,6 +1,6 @@
 // src/app/page.js
 
-import UploadForm from '../components/UploadForm'
+import UploadForm from '../components/form/UploadForm'
 import InfoSection from '../components/InfoSection'
 
 export default function Home() {

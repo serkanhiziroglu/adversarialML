@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import './ProtectButton.css'; // Import the CSS file for the button
+import ProtectButton from './ProtectButton';
+import FileInput from './FileInput';
 
 const UploadForm = () => {
     const [file, setFile] = useState(null);
@@ -39,27 +40,23 @@ const UploadForm = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/upload', formData, {
+            const response = await axios.post('http://localhost:5000/protect', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
             localStorage.setItem('resultData', JSON.stringify(response.data));
-            router.push('/result');
+            router.push('/protect');
         } catch (error) {
             console.error('Error uploading file:', error);
             let errorMessage = 'Error uploading file';
 
             if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
                 errorMessage = error.response.data.message || error.response.statusText;
             } else if (error.request) {
-                // The request was made but no response was received
                 errorMessage = 'No response received from server. Please check your connection.';
             } else {
-                // Something happened in setting up the request that triggered an Error
                 errorMessage = error.message;
             }
 
@@ -67,6 +64,7 @@ const UploadForm = () => {
             setLoading(false);
         }
     };
+
     return (
         <div className="max-w-6xl mx-auto mt-8">
             <div className="shadow-lg rounded-xl overflow-hidden relative">
@@ -94,34 +92,9 @@ const UploadForm = () => {
                                 transition={{ duration: 0.5, ease: 'easeInOut' }}
                                 className="flex flex-col items-center"
                             >
-                                <input
-                                    type="file"
-                                    id="file-selector"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
-                                <label
-                                    htmlFor="file-selector"
-                                    className="mb-2 inline-flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
-                                >
-                                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z" />
-                                        <path d="M9 13h2v5a1 1 0 11-2 0v-5z" />
-                                    </svg>
-                                    Upload your image
-                                </label>
+                                <FileInput onChange={handleFileChange} />
                                 <p className="text-sm text-gray-500 mb-2">or drop it here</p>
-                                <motion.button
-                                    whileHover={{
-                                        y: [0, -2, 0], // Moves the button up and down
-                                        transition: { yoyo: Infinity, duration: 0.5 },
-                                    }}
-                                    onClick={handleSubmit}
-                                    className="button-49 mt-4"
-                                >
-                                    Protect Image
-                                </motion.button>
+                                <ProtectButton onClick={handleSubmit} />
                             </motion.div>
                             {(error || file) && (
                                 <p className="text-sm mt-2 absolute bottom-5">

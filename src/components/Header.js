@@ -31,7 +31,7 @@ export const Header = () => {
                         <ul className="flex space-x-4">
                             {[
                                 { href: '/', label: 'Home' },
-                                { href: '/advanced-testing', label: 'Advanced Testing' },
+                                { href: '/analyze', label: 'Analyze' },
                                 { href: '/faq', label: 'FAQ' },
                             ].map(({ href, label }) => (
                                 <li key={href} className="relative group">
