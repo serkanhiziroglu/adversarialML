@@ -1,3 +1,4 @@
+# Main app.py for endpoints
 from flask import Flask, request
 from flask_cors import CORS
 from routes.protect import protect_image

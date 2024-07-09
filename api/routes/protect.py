@@ -1,3 +1,4 @@
+# Adding FGSM method to protect an image
 from flask import request, jsonify
 from PIL import Image
 import numpy as np
@@ -16,7 +17,7 @@ def protect_image():
 
     allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
     if '.' not in file.filename or file.filename.rsplit('.', 1)[1].lower() not in allowed_extensions:
-        return jsonify({'error': 'Invalid file type'}), 400
+        return jsonify({'error': 'Invalid file type. Supported types: .png, .jpg, .jpeg, .gif'}), 400
 
     try:
         image = Image.open(file.stream)
@@ -28,7 +29,7 @@ def protect_image():
 
     preprocessed_image = preprocess_image(image)
 
-    epsilon = 0.01
+    epsilon = 0.5
     adversarial_image = fgsm.create_fgsm_adversarial_pattern(
         preprocessed_image, epsilon)
 

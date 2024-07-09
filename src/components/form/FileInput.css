@@ -1,9 +1,9 @@
 .uploadButton {
-    background: linear-gradient(-30deg, hwb(330 25% 65%), #4f0d53);    color: #fff;
+    background: rgb(41, 41, 41);
+    color: #fff;
     padding: 8px 24px;
     border: none;
     border-radius: 5px;
-    /* Changed to 15px as per your request */
     cursor: pointer;
     font-size: 14px;
     font-weight: bold;
@@ -16,6 +16,7 @@
 
 .uploadButton:hover {
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    color: #FAC921;
 }
 
 .uploadButton:active {
@@ -41,6 +42,12 @@
     }
 
     100% {
-        transform: scale(5);
+        transform: scale(1);
     }
+}
+
+.svg-clicked {
+    transform: scale(0.75);
+    /* Adjust the scale value as needed */
+    transition: transform 0.2s ease;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-const AdvancedTestingForm = ({ onResult }) => {
+const AnalyzeForm = ({ onResult }) => {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -84,4 +84,4 @@ const AdvancedTestingForm = ({ onResult }) => {
     );
 };
 
-export default AdvancedTestingForm;
+export default AnalyzeForm;

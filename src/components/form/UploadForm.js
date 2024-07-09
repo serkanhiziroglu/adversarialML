@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import ProtectButton from './ProtectButton';
 import FileInput from './FileInput';
+import LoadingIndicator from '../LoadingIndicator'; // Importing the LoadingIndicator component
 
 const UploadForm = () => {
     const [file, setFile] = useState(null);
@@ -53,7 +54,7 @@ const UploadForm = () => {
             let errorMessage = 'Error uploading file';
 
             if (error.response) {
-                errorMessage = error.response.data.message || error.response.statusText;
+                errorMessage = error.response.data.error || error.response.statusText;
             } else if (error.request) {
                 errorMessage = 'No response received from server. Please check your connection.';
             } else {
@@ -97,7 +98,7 @@ const UploadForm = () => {
                                 <ProtectButton onClick={handleSubmit} />
                             </motion.div>
                             {(error || file) && (
-                                <p className="text-sm mt-2 absolute bottom-5">
+                                <p className="text-sm mt-2 absolute bottom-5 text-overflow-ellipsis">
                                     {error ? (
                                         <span className="text-red-600">{error}</span>
                                     ) : (
@@ -111,13 +112,17 @@ const UploadForm = () => {
             </div>
 
             {loading && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg shadow-xl">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-                        <p className="mt-5 text-center text-gray-700">👇 Protecting your image...</p>
-                    </div>
-                </div>
+                <LoadingIndicator /> // Using the LoadingIndicator component
             )}
+
+            <style jsx>{`
+                .text-overflow-ellipsis {
+                    max-width: 200px; /* Adjust as needed */
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+            `}</style>
         </div>
     );
 };

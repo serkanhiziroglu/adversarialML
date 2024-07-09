@@ -1,0 +1,54 @@
+/* LoadingIndicator.css */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(75, 85, 99, 0.75);
+    /* bg-gray-500 with opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    /* Ensure it appears above other elements */
+}
+
+.loading-container {
+    background: white;
+    padding: 1.5rem;
+    /* p-6 */
+    border-radius: 0.5rem;
+    /* rounded-lg */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    /* shadow-xl */
+    text-align: center;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 3rem;
+    /* h-12 */
+    height: 3rem;
+    /* w-12 */
+    border: 0.25rem solid transparent;
+    /* border-b-2 */
+    border-bottom-color: #6b46c1;
+    /* border-purple-600 */
+    border-radius: 50%;
+    /* rounded-full */
+    animation: spin 1s linear infinite;
+    /* animate-spin */
+    margin: 0 auto;
+    /* center */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    margin-top: 1.25rem;
+    /* mt-5 */
+    color: #4a5568;
+    /* text-gray-700 */
+}
