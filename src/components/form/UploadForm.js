@@ -41,7 +41,7 @@ const UploadForm = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/protect', formData, {
+            const response = await axios.post('https://bmepkcp8gc.us-west-2.awsapprunner.com/protect', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

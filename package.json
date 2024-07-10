@@ -6,13 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "export": "next build && next export"
   },
   "dependencies": {
     "@next/font": "^14.2.4",
+    "ampx": "^0.2.1",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.13",
-    "next": "14.2.3",
+    "next": "^14.2.4",
     "node": "^20.13.1",
     "react": "^18",
     "react-dom": "^18"
