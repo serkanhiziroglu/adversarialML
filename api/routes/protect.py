@@ -75,6 +75,7 @@ def calculate_image_ssim(original_image, adversarial_image):
                                data_range=1.0) for i in range(3)])
     
     return ssim_value
+
 def generate_response_data(adversarial_image, ssim_value):
     _, buffer = cv2.imencode('.png', cv2.cvtColor(adversarial_image, cv2.COLOR_RGB2BGR))
     adversarial_image_b64 = base64.b64encode(buffer).decode('utf-8')

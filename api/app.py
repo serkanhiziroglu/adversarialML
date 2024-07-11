@@ -7,24 +7,29 @@ from routes.protect import protect_image
 from routes.analyze import analyze_image
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": [
-    "https://staging.d167phppufzp75.amplifyapp.com",
-    "https://d167phppufzp75.amplifyapp.com"  # Production URL
-]}})
+CORS(app, resources={r"/*": {
+    "origins": ["https://pixelsafe.co", "https://www.pixelsafe.co", "http://localhost:3000"],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}})
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', stream=sys.stdout)
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', stream=sys.stdout)
 logger = app.logger
+
 
 @app.route('/protect', methods=['POST'])
 def protect_route():
     logger.debug("Received request to /protect")
     return protect_image()
 
+
 @app.route('/analyze', methods=['POST'])
 def analyze_route():
     logger.debug("Received request to /analyze")
     return analyze_image()
+
 
 @app.route('/debug', methods=['GET'])
 def debug():
@@ -37,6 +42,9 @@ def debug():
     logger.debug(f"Debug Info: {debug_info}")
     return jsonify(debug_info)
 
+
 if __name__ == '__main__':
     logger.info("Starting Flask application")
-    app.run(host='0.0.0.0', port=8080)
+    app.run(debug=True)
+# Add host='0.0.0.0' for deployment    
+# Add port = 8080 for deployment

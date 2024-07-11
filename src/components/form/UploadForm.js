@@ -41,7 +41,7 @@ const UploadForm = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('https://bmepkcp8gc.us-west-2.awsapprunner.com/protect', formData, {
+            const response = await axios.post(`http://localhost:5000/protect`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -67,17 +67,17 @@ const UploadForm = () => {
     };
 
     return (
-        <div className="max-w-6xl mx-auto mt-8">
+        <div className="max-w-6xl max-h-2xl mx-auto mt-8">
             <div className="shadow-lg rounded-xl overflow-hidden relative">
                 <Image
-                    src="/form-bg-11.png"
+                    src="/form-bg-15.png"
                     alt="Background"
                     layout="fill"
                     objectFit="cover"
                     quality={100}
                     priority
                 />
-                <div className="px-8 py-12 sm:px-12 sm:py-16 relative z-10">
+                <div className="px-8 py-8 sm:px-12 sm:py-8 relative z-10">
                     <div className="bg-white bg-opacity-80 backdrop-blur-sm backdrop-filter flex items-center justify-center border border-gray-200 rounded-xl px-6 py-4 max-w-3xl mx-auto transition-all duration-300 hover:bg-opacity-90 group relative">
                         <div className="absolute inset-2 border border-dashed border-transparent group-hover:border-gray-300 rounded-lg pointer-events-none"></div>
 
@@ -117,7 +117,7 @@ const UploadForm = () => {
 
             <style jsx>{`
                 .text-overflow-ellipsis {
-                    max-width: 200px; /* Adjust as needed */
+                    max-width: 100px; /* Adjust as needed */
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;

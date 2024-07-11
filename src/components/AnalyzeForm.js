@@ -5,6 +5,7 @@ const AnalyzeForm = ({ onResult }) => {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    console.log(`${process.env.REACT_APP_API_URL_DEV}/analyze`);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -31,12 +32,15 @@ const AnalyzeForm = ({ onResult }) => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post('https://bmepkcp8gc.us-west-2.awsapprunner.com/analyze', formData, {
+            const response = await axios.post(`http://localhost:5000/analyze`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+            console.log('http://localhost:5000/analyze');
+
             onResult(response.data);
+
         } catch (error) {
             console.error('Error uploading file:', error);
             if (error.message === 'Network Error') {
